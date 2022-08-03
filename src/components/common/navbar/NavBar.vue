@@ -22,6 +22,7 @@
     .nav-bar{
         display: flex;
         height: 44px;
+        /* width: 363px; */
         line-height: 44px;
         text-align: center;
         box-shadow: 0px 1px 1px 0px rgba(100, 100, 100, .2);

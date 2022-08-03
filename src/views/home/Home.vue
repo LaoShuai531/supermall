@@ -4,14 +4,82 @@
             <div slot="center">购物广场</div>
         </nav-bar>
         <home-swiper :banners="banners"></home-swiper>
+        <recommend-view :recommends="recommends"></recommend-view>
+        <feature-view></feature-view>
+        <tab-control class="tab-control" 
+                     :titles="['流行', '新款', '精选']" 
+                     @tabClick="tabClick"></tab-control>
+        <goods-list :goods="showGoods"></goods-list>
+        <!-- <goods-list-item></goods-list-item> -->
         <h2>首页</h2>
+        <ul>
+            <li>列表1</li>
+            <li>列表2</li>
+            <li>列表3</li>
+            <li>列表4</li>
+            <li>列表5</li>
+            <li>列表6</li>
+            <li>列表7</li>
+            <li>列表8</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表2</li>
+            <li>列表3</li>
+            <li>列表4</li>
+            <li>列表5</li>
+            <li>列表6</li>
+            <li>列表7</li>
+            <li>列表8</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表2</li>
+            <li>列表3</li>
+            <li>列表4</li>
+            <li>列表5</li>
+            <li>列表6</li>
+            <li>列表7</li>
+            <li>列表8</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+            <li>列表9</li>
+        </ul>
     </div>
 </template>
 
 <script>
-import NavBar from "@/components/common/navbar/NavBar.vue"
 import HomeSwiper from "./childComps/HomeSwiper.vue"
-import {getHomeMultidata} from '@/network/home'
+import RecommendView from "./childComps/RecommendView.vue"
+import FeatureView from "./childComps/FeatureView.vue"
+
+import NavBar from "@/components/common/navbar/NavBar.vue"
+import TabControl from "@/components/content/tabControl/TabControl.vue"
+import GoodsList from "@/components/content/goods/GoodsList.vue"
+import GoodsListItem from "@/components/content/goods/GoodsListItem.vue"
+
+import {
+    getHomeMultidata,
+    getHomeGoods
+} from '@/network/home'
 
 // import Swiper from '@/components/common/swiper/Swiper.vue'
 // import SwiperItem from '@/components/common/swiper/SwiperItem.vue'
@@ -23,34 +91,106 @@ import {getHomeMultidata} from '@/network/home'
             NavBar,
             // Swiper,
             // SwiperItem
-            HomeSwiper
+            HomeSwiper,
+            RecommendView,
+            FeatureView,
+            TabControl,
+            GoodsList,
+            GoodsListItem
         },
         data() {
             return {
                 // result: null
                 banners: [],
-                recommends: []
+                recommends: [],
+                goods: {
+                    'pop': {page: 0, list: []},
+                    'new': {page: 0, list: []},
+                    'sell': {page: 0, list: []}
+                },
+                currentType: 'pop'
+            }
+        },
+        // 计算属性
+        computed: {
+            showGoods() {
+                return this.goods[this.currentType].list
             }
         },
         // Vue生命周期的created
         created() {
             // 1. 请求首页多个数据
-            getHomeMultidata().then(res =>{
-                console.log(res);
-                // this.result = res
-                this.banners= res.data.banner.list
-                // this.banners= res.data.banner
-                this.recommends = res.data.recommend.list
-                // this.recommends = res.data.recommend
-            })
+            this.getHomeMultidata()
+
+            // 2. 请求商品数据
+            this.getHomeGoods('pop')
+            this.getHomeGoods('new')
+            this.getHomeGoods('sell')
+        },
+        methods: {
+            /**
+             * 事件监听相关的方法
+             */
+            tabClick(index) {
+                switch (index) {
+                    case 0:
+                        this.currentType = 'pop'
+                        break;
+                    case 1:
+                        this.currentType = 'new'
+                        break;
+                    case 2:
+                        this.currentType = 'sell'
+                        break;
+                    //这里写不写default都可以
+                    default:
+                        break;
+                }
+            },
+            /**
+             * 网络请求相关的方法
+             */
+            getHomeMultidata() {
+                getHomeMultidata().then(res => {
+                    console.log(res);
+                    // this.result = res
+                    this.banners= res.data.banner.list
+                    // this.banners= res.data.banner
+                    this.recommends = res.data.recommend.list
+                    // this.recommends = res.data.recommend
+                })
+            },
+            getHomeGoods(type) {
+                const page = this.goods[type].page + 1
+                getHomeGoods(type, page).then(res => {
+                    // console.log(res);
+                    this.goods[type].list.push(...res.data.list)
+                    this.goods[type].page += 1
+                })
+            }
         }
         
     }
 </script>
 
 <style>
+    #home{
+        padding-top: 44px;
+    }
     .home-nav{
         background-color: var(--color-tint);
         color: #fff;
+        
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        z-index: 99;
+    }
+    
+    .tab-control {
+        /* position: sticky没滑动规定距离之前是sticky属性，但是滑动到了规定距离之后就是flex属性 */
+        position: sticky;
+        top: 44px;
     }
 </style>
