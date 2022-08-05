@@ -3,66 +3,17 @@
         <nav-bar class="home-nav">
             <div slot="center">购物广场</div>
         </nav-bar>
-        <home-swiper :banners="banners"></home-swiper>
-        <recommend-view :recommends="recommends"></recommend-view>
-        <feature-view></feature-view>
-        <tab-control class="tab-control" 
-                     :titles="['流行', '新款', '精选']" 
-                     @tabClick="tabClick"></tab-control>
-        <goods-list :goods="showGoods"></goods-list>
+        <!-- 想滚动的内容直接放到scroll中就行 -->
+        <scroll class="content">
+            <home-swiper :banners="banners"></home-swiper>
+            <recommend-view :recommends="recommends"></recommend-view>
+            <feature-view></feature-view>
+            <tab-control class="tab-control" 
+                        :titles="['流行', '新款', '精选']" 
+                        @tabClick="tabClick"></tab-control>
+            <goods-list :goods="showGoods"></goods-list>
+        </scroll>
         <!-- <goods-list-item></goods-list-item> -->
-        <h2>首页</h2>
-        <ul>
-            <li>列表1</li>
-            <li>列表2</li>
-            <li>列表3</li>
-            <li>列表4</li>
-            <li>列表5</li>
-            <li>列表6</li>
-            <li>列表7</li>
-            <li>列表8</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表2</li>
-            <li>列表3</li>
-            <li>列表4</li>
-            <li>列表5</li>
-            <li>列表6</li>
-            <li>列表7</li>
-            <li>列表8</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表2</li>
-            <li>列表3</li>
-            <li>列表4</li>
-            <li>列表5</li>
-            <li>列表6</li>
-            <li>列表7</li>
-            <li>列表8</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-            <li>列表9</li>
-        </ul>
     </div>
 </template>
 
@@ -72,6 +23,7 @@ import RecommendView from "./childComps/RecommendView.vue"
 import FeatureView from "./childComps/FeatureView.vue"
 
 import NavBar from "@/components/common/navbar/NavBar.vue"
+import Scroll from "@/components/common/scroll/Scroll.vue"
 import TabControl from "@/components/content/tabControl/TabControl.vue"
 import GoodsList from "@/components/content/goods/GoodsList.vue"
 import GoodsListItem from "@/components/content/goods/GoodsListItem.vue"
@@ -80,6 +32,8 @@ import {
     getHomeMultidata,
     getHomeGoods
 } from '@/network/home'
+
+
 
 // import Swiper from '@/components/common/swiper/Swiper.vue'
 // import SwiperItem from '@/components/common/swiper/SwiperItem.vue'
@@ -96,7 +50,8 @@ import {
             FeatureView,
             TabControl,
             GoodsList,
-            GoodsListItem
+            GoodsListItem,
+            Scroll
         },
         data() {
             return {
@@ -173,9 +128,12 @@ import {
     }
 </script>
 
-<style>
+<style scoped>
     #home{
         padding-top: 44px;
+        /* viewport-height视口高度 */
+        height: 100vh;
+        position: relative;
     }
     .home-nav{
         background-color: var(--color-tint);
@@ -192,5 +150,19 @@ import {
         /* position: sticky没滑动规定距离之前是sticky属性，但是滑动到了规定距离之后就是flex属性 */
         position: sticky;
         top: 44px;
+        z-index: 99;
     }
+
+    .content{
+        overflow: hidden;        
+        position: absolute;
+        top: 44px;
+        bottom: 49px;
+        left: 0;
+        right: 0;
+    }
+    /* .content {
+        height: calc(100%-49px);
+        overflow: hidden;
+    } */
 </style>

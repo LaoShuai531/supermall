@@ -25,7 +25,7 @@
     }
 </script>
 
-<style>
+<style scoped>
   .goods {
     display: flex;
      /* 根据宽度 设置一行显示多少个 */
