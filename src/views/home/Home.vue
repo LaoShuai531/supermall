@@ -3,20 +3,25 @@
         <nav-bar class="home-nav">
             <div slot="center">购物广场</div>
         </nav-bar>
+        <tab-control :titles="['流行', '新款', '精选']" 
+                         @tabClick="tabClick" 
+                         ref="tabControl1"
+                         class="tab-control"
+                         v-show="isTabFixed"></tab-control>
         <!-- 想滚动的内容直接放到scroll中就行 -->
         <!-- probe-type中不加 : 传过去的就都是字符串类型 -->
         <scroll class="content" 
                 ref="scroll" 
                 :probe-type="3" 
                 @scroll="contentScroll" 
-                :pull-up-load="true">
-                <!-- @pullingUp="loadMore" -->
-            <home-swiper :banners="banners"></home-swiper>
+                :pull-up-load="true"
+                @pullingUp="loadMore">
+            <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></home-swiper>
             <recommend-view :recommends="recommends"></recommend-view>
             <feature-view></feature-view>
-            <tab-control class="tab-control" 
-                        :titles="['流行', '新款', '精选']" 
-                        @tabClick="tabClick"></tab-control>
+            <tab-control :titles="['流行', '新款', '精选']" 
+                         @tabClick="tabClick" 
+                         ref="tabControl2"></tab-control>
             <goods-list :goods="showGoods"></goods-list>
         </scroll>
 
@@ -42,6 +47,7 @@ import {
     getHomeMultidata,
     getHomeGoods
 } from '@/network/home'
+import { debounce } from "@/common/utils"
 
 
 
@@ -75,7 +81,9 @@ import {
                     'sell': {page: 0, list: []}
                 },
                 currentType: 'pop',
-                isShowBackTop: false
+                isShowBackTop: false,
+                tabOffsetTop: 0,
+                isTabFixed: false
             }
         },
         // 计算属性
@@ -93,13 +101,22 @@ import {
             this.getHomeGoods('pop')
             this.getHomeGoods('new')
             this.getHomeGoods('sell')
-
-            // 3. 监听item中图片是否加载完成
+        },
+        mounted() {
+            // 1. 监听item中图片是否加载完成(事件监听)
+            // 定义一个变量来接收防抖后的数据
+            const refresh = debounce(this.$refs.scroll.refresh, 500)
             // 利用事件总线接收 itemImageLoad
-            this.$bus.$on('itemImageLoad', () =>{
-                console.log('GoodsListItem中图片加载完成了');
-                this.$refs.scroll.refresh()
+            this.$bus.$on('itemImageLoad', () => {
+                // console.log('GoodsListItem中图片加载完成了');
+                // this.$refs.scroll.refresh()
+                refresh()
             })
+
+            // 2. 获取tabControl的offsetTop
+            // 所有的组件都有一个属性$el: 用于获取组件中的元素
+            // console.log(this.$refs.tabControl.$el);
+            // this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
         },
         methods: {
             /**
@@ -120,6 +137,8 @@ import {
                     default:
                         break;
                 }
+                this.$refs.tabControl1.currentIndex = index
+                this.$refs.tabControl2.currentIndex = index
             },
             backClick() {
                 // console.log('可以监听');
@@ -135,14 +154,21 @@ import {
                 //     this.isShowBackTop = false
                 // }
                 // 上面的if-else可以简写成一行代码
+                // 1. 判断BackTop是否显示
                 this.isShowBackTop = -(position.y) > 1000
-            },
-            // loadMore() {
-            //     console.log('上拉加载更多');
-            //     this.getHomeGoods(this.currentType)
 
-            //     // this.$refs.scroll.scroll.refresh()
-            // },
+                // 2. 决定tabControl是否吸顶(position: fixed)
+                this.isTabFixed = -(position.y) > this.tabOffsetTop
+            },
+            loadMore() {
+                console.log('上拉加载更多');
+                this.getHomeGoods(this.currentType)
+                // refresh()
+                // this.$refs.scroll.scroll.refresh()
+            },
+            swiperImageLoad() {
+                this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
+            },
             /**
              * 网络请求相关的方法
              */
@@ -156,6 +182,7 @@ import {
                     // this.recommends = res.data.recommend
                 })
             },
+            // 封装的获取home商品的信息列表
             getHomeGoods(type) {
                 const page = this.goods[type].page + 1
                 getHomeGoods(type, page).then(res => {
@@ -163,7 +190,8 @@ import {
                     this.goods[type].list.push(...res.data.list)
                     this.goods[type].page += 1
 
-                    // this.$refs.scroll.finishPullUp()
+                    // 如果没有下面一行代码，只能多加载一页数据，所以要完成上拉加载更多
+                    this.$refs.scroll.finishPullUp()
                 })
             }
         }
@@ -182,19 +210,21 @@ import {
         background-color: var(--color-tint);
         color: #fff;
         
-        position: fixed;
+        /* 在我们使用浏览器原生滚动时，为了让导航不跟随一起滚动 */
+        /* position: fixed;
         left: 0;
         top: 0;
         right: 0;
-        z-index: 99;
+        z-index: 99; */
     }
     
-    .tab-control {
-        /* position: sticky没滑动规定距离之前是sticky属性，但是滑动到了规定距离之后就是flex属性 */
+    /* .tab-control {
+        position: sticky没滑动规定距离之前是sticky属性，但是滑动到了规定距离之后就是flex属性
+        吸顶的效果
         position: sticky;
         top: 44px;
         z-index: 99;
-    }
+    } */
 
     .content{
         overflow: hidden;        
@@ -209,4 +239,9 @@ import {
         overflow: hidden;
         margin-top: 44px;
     } */
+    
+    .tab-control{
+        position: relative;
+        z-index: 9;
+    }
 </style>

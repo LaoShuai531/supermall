@@ -19,10 +19,10 @@
                 type: Number,
                 default: 0
             },
-            // pullUpLoad: {
-            //     type: Boolean,
-            //     default: false
-            // }
+            pullUpLoad: {
+                type: Boolean,
+                default: false
+            }
         },
         data() {
             return {
@@ -37,30 +37,35 @@
                 pullUpLoad: this.pullUpLoad
             })
             // 2. 监听滚动的位置
-            this.scroll.on('scroll', (position) => {
-                // console.log(position);
-                this.$emit('scroll', position)
-            })
+            if (this.probeType === 2 || this.probeType === 3) {
+                this.scroll.on('scroll', (position) => {
+                    // console.log(position);
+                    this.$emit('scroll', position)
+                })
+            }
 
             console.log(this.scroll); // 没有refresh之前scrollerHeight: 697；给每个图片refresh之后scrollerHeight会做出对应变化
             // 3. 监听上拉事件
-            // this.scroll.on('pullingUp', () => {
-            //     // console.log('上拉加载更多');
-            //     // setTimeout(() => {
-            //     //     this.scroll.finishPullUp()
-            //     // }, 2000);
-            //     this.$emit('pullingUp')
-            // })
+            if (this.pullUpLoad) {
+                this.scroll.on('pullingUp', () => {
+                    // console.log('上拉加载更多');
+                    // setTimeout(() => {
+                    //     this.scroll.finishPullUp()
+                    // }, 2000);
+                    this.$emit('pullingUp')
+                })
+            }
         },
         methods: {
             scrollTo(x, y, time=1000) {
-                this.scroll.scrollTo(x, y, time)
+                this.scroll && this.scroll.scrollTo(x, y, time)
             },
             finishPullUp() {
-                this.scroll.finishPullUp()
+                this.scroll && this.scroll.finishPullUp()
             },
             refresh() {
-                this.scroll.refresh()
+                console.log('---GoodsListItem中图片加载完成了---');
+                this.scroll && this.scroll.refresh()
             }
         }
     }
