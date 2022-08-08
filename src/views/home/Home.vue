@@ -83,7 +83,8 @@ import { debounce } from "@/common/utils"
                 currentType: 'pop',
                 isShowBackTop: false,
                 tabOffsetTop: 0,
-                isTabFixed: false
+                isTabFixed: false,
+                saveY: 0,
             }
         },
         // 计算属性
@@ -117,6 +118,16 @@ import { debounce } from "@/common/utils"
             // 所有的组件都有一个属性$el: 用于获取组件中的元素
             // console.log(this.$refs.tabControl.$el);
             // this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
+        },
+        destroyed() {
+            console.log('home destroy');
+        },
+        activated() {
+            this.$refs.scroll.scrollTo(0, this.saveY, 0)
+            this.$refs.scroll.refresh()
+        },
+        deactivated() {
+            this.saveY = this.$refs.scroll.getScrollY()
         },
         methods: {
             /**

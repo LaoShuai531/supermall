@@ -23,7 +23,7 @@
         },
         methods: {
             itemClick() {
-                // console.log('123')
+                // console.log('跳转到详情页面')
                 //跳转到detail页面 并且传入商品iid
                 this.$router.push('/detail/' + this.goodsItem.iid)
             },

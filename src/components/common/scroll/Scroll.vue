@@ -64,8 +64,11 @@
                 this.scroll && this.scroll.finishPullUp()
             },
             refresh() {
-                console.log('---GoodsListItem中图片加载完成了---');
+                console.log('---所引用refresh方法的区域中图片加载完成了---');
                 this.scroll && this.scroll.refresh()
+            },
+            getScrollY() {
+                return this.scroll ? this.scroll.y : 0
             }
         }
     }
