@@ -6,6 +6,9 @@
             <detail-base-info :goods="goods"></detail-base-info>
             <detail-shop-info :shop="shop"></detail-shop-info>
             <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"></detail-goods-info>
+            <detail-param-info :param-info="paramInfo"></detail-param-info>
+            <detail-comment-info :comment-info="commentInfo"></detail-comment-info>
+            <goods-list :goods="recommends"></goods-list>
         </scroll>
     </div>
 </template>
@@ -16,9 +19,14 @@
     import DetailBaseInfo from './childComps/DetailBaseInfo.vue'
     import DetailShopInfo from './childComps/DetailShopInfo.vue'
     import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
+    import DetailParamInfo from './childComps/DetailParamInfo.vue'
+    import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
     import Scroll from '@/components/common/scroll/Scroll.vue'
+    import GoodsList from '@/components/content/goods/GoodsList.vue'
 
-    import {getDetail, Goods, Shop} from '@/network/detail'
+    import {getDetail, Goods, Shop, GoodsParam, getRecommend} from '@/network/detail'
+    import { debounce } from '@/common/utils'
+    import {itemListenerMixin} from '@/common/mixin'
 
     export default{
         name: 'Detail',
@@ -28,15 +36,23 @@
             DetailBaseInfo,
             DetailShopInfo,
             DetailGoodsInfo,
-            Scroll
+            DetailParamInfo,
+            DetailCommentInfo,
+            Scroll,
+            GoodsList
         },
+        mixins: [itemListenerMixin],
         data() {
             return {
                 iid: null,
                 topImages: [],
                 goods: {},
                 shop: {},
-                detailInfo: {}
+                detailInfo: {},
+                paramInfo: {},
+                commentInfo: {},
+                recommends: [],
+                // itemImageListener: null
             }
         },
         methods: {
@@ -52,6 +68,7 @@
             // 2. 根据iid请求详情数据（建议同样封装一下）
             getDetail(this.iid).then(res => {
                 // 1. 获取数据
+                console.log('楼下是详情数据');
                 console.log(res);
                 const data = res.result;
 
@@ -66,7 +83,34 @@
 
                 // 5. 获取商品详细信息数据
                 this.detailInfo = data.detailInfo
+
+                // 6. 获取参数的信息
+                this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
+
+                // 7. 获取评价的信息
+                if(data.rate.cRate !== 0) {
+                    this.commentInfo = data.rate.list[0]
+                }
             })
+
+            // 3. 请求推荐数据
+            getRecommend().then(res => {
+                console.log('楼下是推荐数据');
+                console.log(res);
+                this.recommends = res.data.list
+            })
+        },
+        mounted() {
+            // // 定义一个变量来接收防抖后的数据
+            // const refresh = debounce(this.$refs.scroll.refresh, 500)
+
+            // // 对监听的事件做一个保存
+            // this.itemImageListener = () => { refresh() }
+
+            // this.$bus.$on('itemImageLoad', this.itemImageListener)
+        },
+        destroyed() {
+            this.$bus.$off('itemImageLoad', this.itemImageListener)
         }
     }
 </script>

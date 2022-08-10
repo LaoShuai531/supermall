@@ -48,6 +48,7 @@ import {
     getHomeGoods
 } from '@/network/home'
 import { debounce } from "@/common/utils"
+import {itemListenerMixin} from '@/common/mixin'
 
 
 
@@ -70,6 +71,7 @@ import { debounce } from "@/common/utils"
             Scroll,
             BackTop
         },
+        mixins: [itemListenerMixin],
         data() {
             return {
                 // result: null
@@ -85,6 +87,7 @@ import { debounce } from "@/common/utils"
                 tabOffsetTop: 0,
                 isTabFixed: false,
                 saveY: 0,
+                // itemImageListener: null
             }
         },
         // 计算属性
@@ -106,13 +109,19 @@ import { debounce } from "@/common/utils"
         mounted() {
             // 1. 监听item中图片是否加载完成(事件监听)
             // 定义一个变量来接收防抖后的数据
-            const refresh = debounce(this.$refs.scroll.refresh, 500)
-            // 利用事件总线接收 itemImageLoad
-            this.$bus.$on('itemImageLoad', () => {
-                // console.log('GoodsListItem中图片加载完成了');
-                // this.$refs.scroll.refresh()
-                refresh()
-            })
+            // const refresh = debounce(this.$refs.scroll.refresh, 500)
+
+            // // 对监听的事件做一个保存
+            // this.itemImageListener = () => { refresh() }
+
+            // // 利用事件总线接收 itemImageLoad
+            // this.$bus.$on('itemImageLoad', this.itemImageListener
+            // // () => {
+            // //     // console.log('GoodsListItem中图片加载完成了');
+            // //     // this.$refs.scroll.refresh()
+            // //     refresh()
+            // // }
+            // )
 
             // 2. 获取tabControl的offsetTop
             // 所有的组件都有一个属性$el: 用于获取组件中的元素
@@ -127,7 +136,11 @@ import { debounce } from "@/common/utils"
             this.$refs.scroll.refresh()
         },
         deactivated() {
+            // 1. 保存Y值
             this.saveY = this.$refs.scroll.getScrollY()
+
+            // 2. 在商品详情页推荐中的话，取消全局事件的监听
+            this.$bus.$off('itemImageLoad', this.itemImageListener)
         },
         methods: {
             /**
