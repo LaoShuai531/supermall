@@ -1,14 +1,14 @@
 <template>
     <div id="detail">
-        <detail-nav-bar class="detail-nav"></detail-nav-bar>
+        <detail-nav-bar class="detail-nav" @titleClick="titleClick"></detail-nav-bar>
         <scroll class="content" ref="scroll">
             <detail-swiper :top-images="topImages"></detail-swiper>
             <detail-base-info :goods="goods"></detail-base-info>
             <detail-shop-info :shop="shop"></detail-shop-info>
             <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"></detail-goods-info>
-            <detail-param-info :param-info="paramInfo"></detail-param-info>
-            <detail-comment-info :comment-info="commentInfo"></detail-comment-info>
-            <goods-list :goods="recommends"></goods-list>
+            <detail-param-info :param-info="paramInfo" ref="paramOffsetTop"></detail-param-info>
+            <detail-comment-info :comment-info="commentInfo" ref="commentOffsetTop"></detail-comment-info>
+            <goods-list :goods="recommends" ref="recommendOffsetTop"></goods-list>
         </scroll>
     </div>
 </template>
@@ -41,6 +41,7 @@
             Scroll,
             GoodsList
         },
+        // 混入：来解决商品推荐中图片滚动不了的bug
         mixins: [itemListenerMixin],
         data() {
             return {
@@ -53,12 +54,25 @@
                 commentInfo: {},
                 recommends: [],
                 // itemImageListener: null
+                themeTopYs: [],
+                getThemeTopY: null
             }
         },
         methods: {
             imageLoad() {
                 this.$refs.scroll.refresh()
-            }
+                // 以下是防抖的方法(由于混入已经将mixin.js中的itemImageListener: null,refresh: null传入到Detail.vue的date中了，
+                // 所以可以使用this.refresh())
+                // this.refresh()
+
+                // 调用getThemeTopY
+                this.getThemeTopY()
+                
+            },
+            titleClick(index) {
+                console.log(index);
+                this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500)
+            },
         },
         created() {
             // 获取动态路由的参数： this.$route.params.iid
@@ -91,6 +105,35 @@
                 if(data.rate.cRate !== 0) {
                     this.commentInfo = data.rate.list[0]
                 }
+                /*
+                // 1. 第一次获取，值不对
+                // 值不对的原因：this.$refs.paramOffsetTop.$el压根没有渲染
+                this.themeTopYs=[]
+
+                this.themeTopYs.push(0)
+                this.themeTopYs.push(this.$refs.paramOffsetTop.$el.offsetTop)
+                this.themeTopYs.push(this.$refs.commentOffsetTop.$el.offsetTop)
+                this.themeTopYs.push(this.$refs.recommendOffsetTop.$el.offsetTop)
+
+                console.log(this.themeTopYs);
+
+                this.$nextTick(() => {
+                    // 2. 第二次获取，值依然不对
+                    // 值不对的原因：图片没有计算在内
+                    // 点击标题滚到对应内容的另一种方法(此处虽然已经赋完值了，但是直接使用拿不到值是因为还没有渲染，更新一下DOM)
+                    // 根据最新的数据，对应的DOM是已经被渲染出来了
+                    // 但是图片依然是没有加载完的
+                    // offsetTop值不对的时候，基本上都是因为图片的问题
+                    this.themeTopYs=[]
+
+                    this.themeTopYs.push(0)
+                    this.themeTopYs.push(this.$refs.paramOffsetTop.$el.offsetTop-44)
+                    this.themeTopYs.push(this.$refs.commentOffsetTop.$el.offsetTop-44)
+                    this.themeTopYs.push(this.$refs.recommendOffsetTop.$el.offsetTop-44)
+
+                    console.log(this.themeTopYs);
+                })
+                */
             })
 
             // 3. 请求推荐数据
@@ -99,6 +142,18 @@
                 console.log(res);
                 this.recommends = res.data.list
             })
+
+            // 4. 给getThemeTopY赋值
+            this.getThemeTopY = () => { 
+                this.themeTopYs=[]
+
+                this.themeTopYs.push(0)
+                this.themeTopYs.push(this.$refs.paramOffsetTop.$el.offsetTop-44)
+                this.themeTopYs.push(this.$refs.commentOffsetTop.$el.offsetTop-44)
+                this.themeTopYs.push(this.$refs.recommendOffsetTop.$el.offsetTop-44)
+
+                console.log(this.themeTopYs);
+            }
         },
         mounted() {
             // // 定义一个变量来接收防抖后的数据
@@ -109,6 +164,16 @@
 
             // this.$bus.$on('itemImageLoad', this.itemImageListener)
         },
+        // updated() {
+        //     this.themeTopYs=[]
+
+        //     this.themeTopYs.push(0)
+        //     this.themeTopYs.push(this.$refs.paramOffsetTop.$el.offsetTop)
+        //     this.themeTopYs.push(this.$refs.commentOffsetTop.$el.offsetTop)
+        //     this.themeTopYs.push(this.$refs.recommendOffsetTop.$el.offsetTop)
+
+        //     console.log(this.themeTopYs);
+        // },
         destroyed() {
             this.$bus.$off('itemImageLoad', this.itemImageListener)
         }
