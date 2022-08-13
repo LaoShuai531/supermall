@@ -1,7 +1,10 @@
 <template>
     <div id="detail">
-        <detail-nav-bar class="detail-nav" @titleClick="titleClick"></detail-nav-bar>
-        <scroll class="content" ref="scroll">
+        <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="navBar"></detail-nav-bar>
+        <scroll class="content"
+                ref="scroll"
+                :probe-type="3" 
+                @scroll="contentScroll">
             <detail-swiper :top-images="topImages"></detail-swiper>
             <detail-base-info :goods="goods"></detail-base-info>
             <detail-shop-info :shop="shop"></detail-shop-info>
@@ -10,6 +13,7 @@
             <detail-comment-info :comment-info="commentInfo" ref="commentOffsetTop"></detail-comment-info>
             <goods-list :goods="recommends" ref="recommendOffsetTop"></goods-list>
         </scroll>
+        <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
     </div>
 </template>
 
@@ -21,12 +25,13 @@
     import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
     import DetailParamInfo from './childComps/DetailParamInfo.vue'
     import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
+
     import Scroll from '@/components/common/scroll/Scroll.vue'
     import GoodsList from '@/components/content/goods/GoodsList.vue'
 
     import {getDetail, Goods, Shop, GoodsParam, getRecommend} from '@/network/detail'
     import { debounce } from '@/common/utils'
-    import {itemListenerMixin} from '@/common/mixin'
+    import {itemListenerMixin, backTopMixin} from '@/common/mixin'
 
     export default{
         name: 'Detail',
@@ -39,10 +44,10 @@
             DetailParamInfo,
             DetailCommentInfo,
             Scroll,
-            GoodsList
+            GoodsList,
         },
         // 混入：来解决商品推荐中图片滚动不了的bug
-        mixins: [itemListenerMixin],
+        mixins: [itemListenerMixin, backTopMixin],
         data() {
             return {
                 iid: null,
@@ -55,7 +60,8 @@
                 recommends: [],
                 // itemImageListener: null
                 themeTopYs: [],
-                getThemeTopY: null
+                getThemeTopY: null,
+                themeTopIndex: 0,
             }
         },
         methods: {
@@ -73,6 +79,60 @@
                 console.log(index);
                 this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500)
             },
+            contentScroll(position) {
+                // 1. 获取y值
+                const positionY = -position.y
+                // console.log(positionY);
+                // 2. 再用positionY的值和我们主题中的值进行对比
+                // 例如[0, 8118, 8794, 9106]这样的值
+                // 如果positionY在 0 - 8118 之间，则 index = 0
+                // 如果positionY在 8118 - 8794 之间，则 index = 1
+                // 如果positionY在 8794 - 9106 之间，则 index = 2
+                // 如果positionY在 超过 9106 值时，则 index = 3
+                let length = this.themeTopYs.length
+                
+                for(let i = 0; i < length - 1; i++){
+                    // for(let i in this.themeTopYs) {
+                    //     if (positionY > this.themeTopYs[parseInt(i)] && positionY < this.themeTopYs[i+1]) {
+                    //      console.log(i);
+                    //     }
+                    // }
+
+                    // hacker做法
+                    if (this.themeTopIndex !== i && (positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i+1])) {
+                            this.themeTopIndex = i;
+                            console.log(this.themeTopIndex);
+                            this.$refs.navBar.currentIndex = this.themeTopIndex
+                    }
+
+                    // 普通做法
+                    // if (this.themeTopIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i+1])
+                    // || (i === length - 1 && positionY > this.themeTopYs[i]))) {
+                    //     this.themeTopIndex = i;
+                    //     console.log(this.themeTopIndex);
+                    //     this.$refs.navBar.currentIndex = this.themeTopIndex
+                    // }
+                }
+
+                // 3. 是否显示回到顶部
+                this.isShowBackTop = -(position.y) > 1000
+            },
+            // addToCart() {
+            //     // 1. 获取购物车需要展示的商品信息
+            //     // console.log(this.goods);
+            //     // const product = {}
+            //     // product.image = this.topImages[0]
+            //     // product.title = this.goods.title
+            //     // product.desc = this.goods.desc
+            //     // product.price = this.goods.price
+            //     // product.iid = this.iid
+            //     // product.realPrice = this.goods.lowNowPrice
+            //     consolt.log('快点加入购物车');
+
+            //     // 2. 将商品添加到购物车里面(利用vuex来状态管理)
+            //     // this.$store.cartList.push(product) 但是不建议这样做，需要通过mutations来添加
+            //     // this.$store.commit('addToCart', product)
+            // },
         },
         created() {
             // 获取动态路由的参数： this.$route.params.iid
@@ -151,6 +211,7 @@
                 this.themeTopYs.push(this.$refs.paramOffsetTop.$el.offsetTop-44)
                 this.themeTopYs.push(this.$refs.commentOffsetTop.$el.offsetTop-44)
                 this.themeTopYs.push(this.$refs.recommendOffsetTop.$el.offsetTop-44)
+                this.themeTopYs.push(Number.MAX_VALUE) // hacker做法，往themeTopYs多加一个无穷大的值
 
                 console.log(this.themeTopYs);
             }
@@ -196,7 +257,7 @@
     .content{
         /* 之前用的是定位方法来设置可滚动高度
         这回用calc的方法 */
-        height: calc(100% - 43px);
+        height: calc(100% - 43px - 49px);
         overflow: hidden;
         /* margin-top: 44px; */
     }

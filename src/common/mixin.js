@@ -39,3 +39,22 @@ export const itemListenerMixin = {
 //         console.log('我是混入中的内容');
 //     }
 // }
+
+export const backTopMixin = {
+    components: {
+        BackTop
+    },
+    data() {
+        return {
+            isShowBackTop: false,
+        }
+    },
+    methods: {
+        backClick() {
+            // console.log('可以监听');
+            // this.$refs.scroll.scroll.scrollTo(0, 0, 1000)
+            // 下面是封装的思想
+            this.$refs.scroll.scrollTo(0, 0)
+        },
+    }
+}
