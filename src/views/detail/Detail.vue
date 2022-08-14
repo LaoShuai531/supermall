@@ -13,6 +13,7 @@
             <detail-comment-info :comment-info="commentInfo" ref="commentOffsetTop"></detail-comment-info>
             <goods-list :goods="recommends" ref="recommendOffsetTop"></goods-list>
         </scroll>
+        <detail-bottom-bar @addCart="addToCart"></detail-bottom-bar>
         <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
     </div>
 </template>
@@ -25,6 +26,7 @@
     import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
     import DetailParamInfo from './childComps/DetailParamInfo.vue'
     import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
+    import DetailBottomBar from './childComps/DetailBottomBar.vue'
 
     import Scroll from '@/components/common/scroll/Scroll.vue'
     import GoodsList from '@/components/content/goods/GoodsList.vue'
@@ -43,6 +45,7 @@
             DetailGoodsInfo,
             DetailParamInfo,
             DetailCommentInfo,
+            DetailBottomBar,
             Scroll,
             GoodsList,
         },
@@ -117,22 +120,24 @@
                 // 3. 是否显示回到顶部
                 this.isShowBackTop = -(position.y) > 1000
             },
-            // addToCart() {
-            //     // 1. 获取购物车需要展示的商品信息
-            //     // console.log(this.goods);
-            //     // const product = {}
-            //     // product.image = this.topImages[0]
-            //     // product.title = this.goods.title
-            //     // product.desc = this.goods.desc
-            //     // product.price = this.goods.price
-            //     // product.iid = this.iid
-            //     // product.realPrice = this.goods.lowNowPrice
-            //     consolt.log('快点加入购物车');
+            addToCart() {
+                // 1. 获取购物车需要展示的商品信息
+                console.log(this.goods);
+                const product = {}
+                product.image = this.topImages[0]
+                product.title = this.goods.title
+                product.desc = this.goods.desc
+                product.price = this.goods.price
+                product.iid = this.iid
+                product.realPrice = this.goods.lowNowPrice
+                console.log('快点加入购物车');
 
-            //     // 2. 将商品添加到购物车里面(利用vuex来状态管理)
-            //     // this.$store.cartList.push(product) 但是不建议这样做，需要通过mutations来添加
-            //     // this.$store.commit('addToCart', product)
-            // },
+                // 2. 将商品添加到购物车里面(利用vuex来状态管理)
+                // this.$store.cartList.push(product) 但是不建议这样做，需要通过mutations来添加
+                // this.$store.commit('addToCart', product)
+                this.$store.dispatch('addCart', product)
+                alert('已加入购物车')
+            },
         },
         created() {
             // 获取动态路由的参数： this.$route.params.iid
