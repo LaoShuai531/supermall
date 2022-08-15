@@ -9,6 +9,7 @@
         <shopcart-list></shopcart-list>
 
         <!-- 底部的汇总 -->
+        <shopcart-bottom-bar></shopcart-bottom-bar>
     </div>
 
 </template>
@@ -17,6 +18,7 @@
     import NavBar from "@/components/common/navbar/NavBar.vue";
 
     import ShopcartList from "./childComps/ShopcartList.vue";
+    import ShopcartBottomBar from "./childComps/ShopcartBottomBar.vue";
 
     import { mapGetters } from "vuex";
 
@@ -24,7 +26,8 @@
         name: 'Shopcart',
         components: {
             NavBar,
-            ShopcartList
+            ShopcartList,
+            ShopcartBottomBar
         },
         computed: {
             // mapGetters使用的两种语法
@@ -39,9 +42,9 @@
 </script>
 
 <style scoped>
-    /* .shopcart {
-        height: 100vh;
-    } */
+    .shopcart {
+        height: 10vh;
+    }
 
     .nav-bar {
         position: relative;

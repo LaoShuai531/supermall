@@ -127,9 +127,9 @@
                 product.image = this.topImages[0]
                 product.title = this.goods.title
                 product.desc = this.goods.desc
-                product.price = this.goods.price
+                product.price = this.goods.realPrice
                 product.iid = this.iid
-                product.realPrice = this.goods.lowNowPrice
+                // product.realPrice = this.goods.realPrice
                 console.log('快点加入购物车');
 
                 // 2. 将商品添加到购物车里面(利用vuex来状态管理)

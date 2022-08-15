@@ -26,6 +26,7 @@
         computed: {
             ...mapGetters(['cartList'])
         },
+        // 不能在created和mounted中进行刷新，因为做了缓存
         activated() {
             this.$refs.scroll.refresh()
         }
@@ -37,9 +38,21 @@
         height: calc(100vh - 44px - 49px);
     } */
 
-    .content {
+    /* .content { */
         /* height: 100%; */
-        height: calc(100vh - 44px - 49px);
+        /* height: calc(100vh - 44px - 49px);
+        overflow: hidden;
+    } */
+
+    .shopcart-list {
+        position: absolute;
+        top: 44px;
+        /* bottom: 49px; */
+        bottom: 93px;
+        width: 100%;
+    }
+    .content {
+        height: 100%;
         overflow: hidden;
     }
 </style>
