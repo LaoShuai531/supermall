@@ -5,7 +5,7 @@ import store from './store'
 
 import toast from './components/common/toast/index'
 
-import VueLazyLoad from 'vue-lazyload'
+// import VueLazyLoad from 'vue-lazyload'
 
 Vue.config.productionTip = false
 
@@ -14,7 +14,7 @@ Vue.prototype.$bus = new Vue()
 // 安装toast插件
 Vue.use(toast)
 // 安装Vue-lazyload图片懒加载插件
-Vue.use(VueLazyLoad)
+// Vue.use(VueLazyLoad)
 
 new Vue({
   render: h => h(App),

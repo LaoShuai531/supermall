@@ -15,6 +15,7 @@ export const itemListenerMixin = {
         // 对监听的事件做一个保存（这里就是典型的一个闭包）
         this.itemImageListener = () => { refresh() }
 
+        // 利用事件总线接收 itemImageLoad
         this.$bus.$on('itemImageLoad', this.itemImageListener)
         console.log('我是混入中的内容');
     }
