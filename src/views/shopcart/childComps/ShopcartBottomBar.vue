@@ -1,7 +1,7 @@
 <template>
   <div class="bottom-bar">
     <!-- 左侧全选 -->
-    <check-button class="select-all" :is-checked="isSelectAll" @click.native="checkClick" />
+    <check-button class="select-all" :is-checked="isSelectAll" @click.native="checkClick" /> <!-- 不能监听组件的点击，所以添加.native -->
     <span>全选</span>
     <!-- 中间合计 -->
     <span class="total-price">合计:{{ totalPrice }}</span>
@@ -37,14 +37,14 @@ export default {
       }, 0).toFixed(2)
     },
     checkLength() {
-      // 去结算的结算算数量 
+      // 去结算的结算数量 
       return this.cartList.filter(item => item.checked).length
     },
     
     // 判断是否全部选中
     isSelectAll() {
       if(!this.cartList.length) return false
-      // 1.使用filter：有没有选中的就返回false，对于不是0的数字，取反返回false；对于0，取反返回true
+      // 1.使用filter：有 没有选中的就返回false，对于不是0的数字，取反返回false；对于0，取反返回true
       // return !(this.cartList.filter(item => !item.checked).length)
 
       // 2.使用find：效率更高
@@ -61,9 +61,9 @@ export default {
   methods: {
     // 全选按钮的点击事件
     checkClick() {
-      if(this.isSelectAll) {  // 全选 
+      if(this.isSelectAll) {  // 全部选中
         this.cartList.forEach(item => item.checked = false)
-      }else {
+      }else { // 部分或者全部不选中
         this.cartList.forEach(item => item.checked = true)
       }
     },

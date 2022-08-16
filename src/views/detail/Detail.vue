@@ -15,6 +15,7 @@
         </scroll>
         <detail-bottom-bar @addCart="addToCart"></detail-bottom-bar>
         <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
+        <!-- <toast :message="message" :isShow="isShow"></toast> -->
     </div>
 </template>
 
@@ -30,10 +31,14 @@
 
     import Scroll from '@/components/common/scroll/Scroll.vue'
     import GoodsList from '@/components/content/goods/GoodsList.vue'
+    // import Toast from '@/components/common/toast/Toast.vue'
 
     import {getDetail, Goods, Shop, GoodsParam, getRecommend} from '@/network/detail'
     import { debounce } from '@/common/utils'
     import {itemListenerMixin, backTopMixin} from '@/common/mixin'
+
+    // 想要从actions中映射过来方法，需要导入
+    import { mapActions } from 'vuex'
 
     export default{
         name: 'Detail',
@@ -48,6 +53,7 @@
             DetailBottomBar,
             Scroll,
             GoodsList,
+            // Toast
         },
         // 混入：来解决商品推荐中图片滚动不了的bug
         mixins: [itemListenerMixin, backTopMixin],
@@ -65,9 +71,12 @@
                 themeTopYs: [],
                 getThemeTopY: null,
                 themeTopIndex: 0,
+                // message: '',
+                // isShow: false
             }
         },
         methods: {
+            ...mapActions(['addCart']),
             imageLoad() {
                 this.$refs.scroll.refresh()
                 // 以下是防抖的方法(由于混入已经将mixin.js中的itemImageListener: null,refresh: null传入到Detail.vue的date中了，
@@ -135,8 +144,29 @@
                 // 2. 将商品添加到购物车里面(利用vuex来状态管理)
                 // this.$store.cartList.push(product) 但是不建议这样做，需要通过mutations来添加
                 // this.$store.commit('addToCart', product)
-                this.$store.dispatch('addCart', product)
-                alert('已加入购物车')
+
+                // actions里面的方法也可以通过{ mapActions }调用直接映射到普通组件里面的methods里面
+                this.addCart(product).then(res => {
+                    // this.isShow = true
+                    // // this.message = '加入购物车成功'
+                    // this.message = res
+                    // console.log(res);
+
+                    // setTimeout(() => {
+                    //     this.isShow = false
+                    //     this.message = ''
+                    // },1500)
+
+                    console.log(res);
+                    console.log(this.$toast);
+                    this.$toast.show(res, 2000)
+                })
+
+                // dispatch会返回一个Promise
+                // this.$store.dispatch('addCart', product).then(res => {
+                //     console.log(res);
+                // })
+                // alert('已加入购物车')
             },
         },
         created() {
